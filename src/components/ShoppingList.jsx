@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push, onValue, remove } from "firebase/database";
+import {FaTimes, FaEdit} from 'react-icons/fa'
 
 import {
   getFirestore,
@@ -31,12 +31,41 @@ function ShoppingList() {
   const [items, setItems] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [list, setList] = useState(null)
+  const [itemEdit, setItemEdit] = useState({
+    item: {},
+    edit: false,
+})
+
+
+const editItem = (item) => {
+  setItemEdit({
+      item,
+      edit: true,
+  })
+}
+
 
   const handleAddButtonClick = async () => {
-     
+
+    if(itemEdit.edit === true) {
+
+      const docRef = doc(db, "shoppingList", itemEdit.item.id)
+      await setDoc(docRef, { body: list.body }, { merge: true })
+      setItemEdit({
+    item: {},
+    edit: false,
+})
+setInputValue([]);
+    setList(null)
+
+    } else {
     await addDoc(shoppingListInDB, list);
     setInputValue([]);
     setList(null)
+
+    }
+     
+    
 
   };
 
@@ -57,7 +86,7 @@ function ShoppingList() {
     const exactLocationOfItemInDB = doc(db, "shoppingList", itemId);
     deleteDoc(exactLocationOfItemInDB);
   };
-  console.log(items)
+ // console.log(items)
   useEffect(() => {
     const unsubscribe = onSnapshot(shoppingListInDB, (snapshot) => {
       
@@ -73,6 +102,14 @@ function ShoppingList() {
     
   }, []);
 
+  useEffect(() => {
+    if(itemEdit.edit === true) {
+        
+      setInputValue(itemEdit.item.body)
+        
+    }
+}, [itemEdit])
+
   return (
     <div className="container">
       <img src={myImage} />
@@ -81,11 +118,17 @@ function ShoppingList() {
         value={inputValue}
         onChange={handleInputChange}
       />
-      <button onClick={handleAddButtonClick}>Add</button>
+      <button onClick={handleAddButtonClick}>{itemEdit.edit ? "Update" : "Add"}</button>
       <ul>
         {items.length > 0 ? (
           items.map((itemId) => (
-            <li key={itemId.id}  onClick={() => handleItemRemove(itemId.id)}>
+            <li key={itemId.id} >
+              <button onClick={() => handleItemRemove(itemId.id)} className="close">
+            <FaTimes color='purple' />
+        </button>
+        <button onClick={() => editItem(itemId)}  className="edit">
+          <FaEdit color='purple' />
+        </button>
               {itemId.body}
             </li>
           ))

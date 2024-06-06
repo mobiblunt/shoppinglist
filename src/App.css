@@ -77,3 +77,13 @@ ul li:hover {
     background-color: #FFECC7;
     cursor: pointer;
 }
+
+.close,
+.edit {
+  
+  top: 10px;
+  right: 20px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
